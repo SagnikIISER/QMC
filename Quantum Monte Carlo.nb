@@ -1,0 +1,703 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     24246,        695]
+NotebookOptionsPosition[     22890,        645]
+NotebookOutlinePosition[     23238,        660]
+CellTagsIndexPosition[     23195,        657]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["QMC", "Section",
+ CellChangeTimes->{{3.8411269017605877`*^9, 3.841126908330132*^9}}],
+
+Cell["\<\
+This document is an attempt to write a Metropolis Monte Carlo for Quantum \
+Spin problems. At least here we would focus on visualization aspects since a \
+lot of it has to do with the physics.\[LineSeparator]
+First we need to define the system. Our first attempt is a 2D square lattice \
+on spins which can be defined as a Matrix. \[LineSeparator](We choose array \
+since it makes life easier to switch between dimensions and lattice size.\
+\[LineSeparator]\[LineSeparator]Linear Lattice Dimension = m\[LineSeparator]\
+\>", "Text",
+ CellChangeTimes->{{3.8411269112548532`*^9, 3.841127119063778*^9}, {
+  3.841127258837717*^9, 3.8411273566141777`*^9}, {3.8411304748399143`*^9, 
+  3.8411305132905345`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"m", "=", "6"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"A", "=", 
+  RowBox[{"ConstantArray", "[", 
+   RowBox[{"1", ",", 
+    RowBox[{"{", 
+     RowBox[{"m", ",", "m"}], "}"}]}], "]"}]}]}], "Input",
+ CellChangeTimes->{{3.841129858726158*^9, 3.8411298962142444`*^9}, {
+   3.841129930725404*^9, 3.8411299317441463`*^9}, 3.841135235803236*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}], 
+   ",", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "1", ",", "1", ",", "1", ",", "1", ",", "1"}], "}"}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.841129897068453*^9, 3.841129932149703*^9, 
+  3.8411301552678056`*^9, 3.8411316150824227`*^9, 3.8411352372052164`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"A", "//", "MatrixForm"}], "\[IndentingNewLine]", 
+ RowBox[{"MatrixPlot", "[", 
+  RowBox[{"A", ",", 
+   RowBox[{"ColorRules", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "1"}], "\[Rule]", "LightBlue"}], ",", 
+      RowBox[{"1", "\[Rule]", "LightYellow"}]}], "}"}]}], ",", 
+   RowBox[{"Mesh", "->", "All"}], ",", 
+   RowBox[{"MeshStyle", "\[Rule]", 
+    RowBox[{"Directive", "[", 
+     RowBox[{"Gray", ",", "Dashed"}], "]"}]}], ",", " ", 
+   RowBox[{"ImageSize", "\[Rule]", "Small"}]}], "]"}]}], "Input"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", "1", "1", "1", "1", "1"},
+     {"1", "1", "1", "1", "1", "1"},
+     {"1", "1", "1", "1", "1", "1"},
+     {"1", "1", "1", "1", "1", "1"},
+     {"1", "1", "1", "1", "1", "1"},
+     {"1", "1", "1", "1", "1", "1"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.841131682337082*^9, 3.841135239310338*^9}],
+
+Cell[BoxData[
+ GraphicsBox[{RasterBox[CompressedData["
+1:eJxTTMoPSmVmYGBgg2IQGwI+2MNoYzB4bT8qPio+Kk65OAAEAavk
+    "], {{0, 0}, {6, 6}}, {0, 1}], {
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 6}, {6, 6}}, {{0, 5}, {6, 5}}, {{0, 4}, {6, 4}}, {{0, 
+       3}, {6, 3}}, {{0, 2}, {6, 2}}, {{0, 1}, {6, 1}}, {{0, 0}, {6, 0}}}],
+      Antialiasing->False]}, 
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 0}, {0, 6}}, {{1, 0}, {1, 6}}, {{2, 0}, {2, 6}}, {{3, 
+       0}, {3, 6}}, {{4, 0}, {4, 6}}, {{5, 0}, {5, 6}}, {{6, 0}, {6, 6}}}],
+      Antialiasing->False]}}},
+  Frame->True,
+  FrameLabel->{None, None},
+  FrameTicks->{{{{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}, {{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}}, {{{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}, {{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}}},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  ImageSize->Small,
+  Method->{
+   "AxisPadding" -> Scaled[0.02], "DefaultBoundaryStyle" -> Automatic, 
+    "DefaultPlotStyle" -> Automatic, "DomainPadding" -> Scaled[0.02], 
+    "RangePadding" -> Scaled[0.05]}]], "Output",
+ CellChangeTimes->{3.841131682337082*^9, 3.841135239414236*^9}]
+}, Open  ]],
+
+Cell["\<\
+
+
+This was one of the ground-state configurations. We can randomize it as \
+follows.\
+\>", "Text",
+ CellChangeTimes->{{3.8411274370085325`*^9, 3.8411274911066737`*^9}, {
+  3.841127598054302*^9, 3.8411276211266932`*^9}, {3.8411280198659143`*^9, 
+  3.841128025463046*^9}, {3.8411281423391705`*^9, 3.8411281434745903`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"For", "[", 
+   RowBox[{
+    RowBox[{"i", "=", "1"}], ",", 
+    RowBox[{"i", "<", 
+     RowBox[{"(", 
+      RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+    RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"For", "[", 
+     RowBox[{
+      RowBox[{"j", "=", "1"}], ",", 
+      RowBox[{"j", "<", 
+       RowBox[{"(", 
+        RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+      RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"A", "[", 
+         RowBox[{"[", 
+          RowBox[{"i", ",", "j"}], "]"}], "]"}], "=", 
+        RowBox[{
+         RowBox[{"2", "*", 
+          RowBox[{"RandomInteger", "[", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "1"}], "}"}], "]"}]}], "-", "1"}]}], ";"}]}], 
+     "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", "]"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"A", "//", "MatrixForm"}], "\[IndentingNewLine]", 
+ RowBox[{"MatrixPlot", "[", 
+  RowBox[{"A", ",", 
+   RowBox[{"ColorRules", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "1"}], "\[Rule]", "LightBlue"}], ",", 
+      RowBox[{"1", "\[Rule]", "LightYellow"}]}], "}"}]}], ",", 
+   RowBox[{"Mesh", "->", "All"}], ",", 
+   RowBox[{"MeshStyle", "\[Rule]", 
+    RowBox[{"Directive", "[", 
+     RowBox[{"Gray", ",", "Dashed"}], "]"}]}], ",", " ", 
+   RowBox[{"ImageSize", "\[Rule]", "Small"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.841127665148707*^9, 3.841127853618637*^9}, {
+  3.8411278896741443`*^9, 3.841127953166894*^9}, {3.8411279878678827`*^9, 
+  3.841128006827838*^9}, {3.8411280457261744`*^9, 3.8411280837274857`*^9}, {
+  3.841129833904349*^9, 3.841129843919531*^9}, {3.841129967042929*^9, 
+  3.8411299804097223`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}]},
+     {"1", 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], "1"},
+     {"1", 
+      RowBox[{"-", "1"}], "1", "1", 
+      RowBox[{"-", "1"}], "1"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{
+  3.841129981931178*^9, 3.8411301590085897`*^9, {3.8411316939675417`*^9, 
+   3.841131699170657*^9}, 3.8411352436887264`*^9}],
+
+Cell[BoxData[
+ GraphicsBox[{RasterBox[CompressedData["
+1:eJxTTMoPSmVmYGBgg2IQGwI+2MNoYzB4bX99cYEt1/XX9iLr3B9WibyzR1eH
+rp5a5uBST2txWrt/uKqnVjwONvdQSxwANswGLw==
+    "], {{0, 0}, {6, 6}}, {0, 1}], {
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 6}, {6, 6}}, {{0, 5}, {6, 5}}, {{0, 4}, {6, 4}}, {{0, 
+       3}, {6, 3}}, {{0, 2}, {6, 2}}, {{0, 1}, {6, 1}}, {{0, 0}, {6, 0}}}],
+      Antialiasing->False]}, 
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 0}, {0, 6}}, {{1, 0}, {1, 6}}, {{2, 0}, {2, 6}}, {{3, 
+       0}, {3, 6}}, {{4, 0}, {4, 6}}, {{5, 0}, {5, 6}}, {{6, 0}, {6, 6}}}],
+      Antialiasing->False]}}},
+  Frame->True,
+  FrameLabel->{None, None},
+  FrameTicks->{{{{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}, {{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}}, {{{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}, {{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}}},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  ImageSize->Small,
+  Method->{
+   "AxisPadding" -> Scaled[0.02], "DefaultBoundaryStyle" -> Automatic, 
+    "DefaultPlotStyle" -> Automatic, "DomainPadding" -> Scaled[0.02], 
+    "RangePadding" -> Scaled[0.05]}]], "Output",
+ CellChangeTimes->{
+  3.841129981931178*^9, 3.8411301590085897`*^9, {3.8411316939675417`*^9, 
+   3.841131699170657*^9}, 3.84113524379204*^9}]
+}, Open  ]],
+
+Cell["\<\
+
+
+One Key aspect of the Monte Carlo is randomly inverting a spin to generate a \
+new configuration. This can be achieved as follows.\[LineSeparator]First \
+choose the location randomly. And then invert the spin.\
+\>", "Text",
+ CellChangeTimes->{{3.841128134529411*^9, 3.8411281655364847`*^9}, {
+  3.8411283036541843`*^9, 3.841128439579686*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"a", "=", 
+   RowBox[{"RandomInteger", "[", 
+    RowBox[{"{", 
+     RowBox[{"1", ",", "m"}], "}"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"b", "=", 
+   RowBox[{"RandomInteger", "[", 
+    RowBox[{"{", 
+     RowBox[{"1", ",", "m"}], "}"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"A", "[", 
+     RowBox[{"[", 
+      RowBox[{"a", ",", "b"}], "]"}], "]"}], "=", 
+    RowBox[{
+     RowBox[{"-", "1"}], "*", 
+     RowBox[{"A", "[", 
+      RowBox[{"[", 
+       RowBox[{"a", ",", "b"}], "]"}], "]"}]}]}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{"A", "//", "MatrixForm"}], "\[IndentingNewLine]", 
+ RowBox[{"MatrixPlot", "[", 
+  RowBox[{"A", ",", 
+   RowBox[{"ColorRules", "->", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "1"}], "\[Rule]", "LightBlue"}], ",", 
+      RowBox[{"1", "\[Rule]", "LightYellow"}]}], "}"}]}], ",", 
+   RowBox[{"Mesh", "->", "All"}], ",", 
+   RowBox[{"MeshStyle", "\[Rule]", 
+    RowBox[{"Directive", "[", 
+     RowBox[{"Gray", ",", "Dashed"}], "]"}]}], ",", " ", 
+   RowBox[{"ImageSize", "\[Rule]", "Small"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.841128443021242*^9, 3.8411285418344755`*^9}, {
+  3.841128588946845*^9, 3.841128592722021*^9}, {3.841129851172099*^9, 
+  3.8411298532622643`*^9}, {3.841130004255674*^9, 3.8411300148570576`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}]},
+     {"1", 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1", 
+      RowBox[{"-", "1"}], "1"},
+     {
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], 
+      RowBox[{"-", "1"}], "1"},
+     {"1", 
+      RowBox[{"-", "1"}], "1", "1", 
+      RowBox[{"-", "1"}], "1"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{{3.841130011793043*^9, 3.841130015738484*^9}, 
+   3.8411301710206933`*^9, 3.841131747508787*^9, {3.8411328808313236`*^9, 
+   3.8411328972941236`*^9}, 3.8411352471860857`*^9}],
+
+Cell[BoxData[
+ GraphicsBox[{RasterBox[CompressedData["
+1:eJxTTMoPSmVmYGBgg2IQGwI+2MNoYzB4bX99cYEt1/XX9iLr3B9WibyzR1eH
+rp5a5uBST2txWrt/uKofqHgcbO7BJQ4AzIIKew==
+    "], {{0, 0}, {6, 6}}, {0, 1}], {
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 6}, {6, 6}}, {{0, 5}, {6, 5}}, {{0, 4}, {6, 4}}, {{0, 
+       3}, {6, 3}}, {{0, 2}, {6, 2}}, {{0, 1}, {6, 1}}, {{0, 0}, {6, 0}}}],
+      Antialiasing->False]}, 
+    {GrayLevel[0.5], Dashing[{Small, Small}], 
+     StyleBox[
+      LineBox[{{{0, 0}, {0, 6}}, {{1, 0}, {1, 6}}, {{2, 0}, {2, 6}}, {{3, 
+       0}, {3, 6}}, {{4, 0}, {4, 6}}, {{5, 0}, {5, 6}}, {{6, 0}, {6, 6}}}],
+      Antialiasing->False]}}},
+  Frame->True,
+  FrameLabel->{None, None},
+  FrameTicks->{{{{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}, {{5.5, 
+       FormBox["1", TraditionalForm]}, {4.5, 
+       FormBox["2", TraditionalForm]}, {3.5, 
+       FormBox["3", TraditionalForm]}, {2.5, 
+       FormBox["4", TraditionalForm]}, {1.5, 
+       FormBox["5", TraditionalForm]}, {0.5, 
+       FormBox["6", TraditionalForm]}}}, {{{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}, {{0.5, 
+       FormBox["1", TraditionalForm]}, {1.5, 
+       FormBox["2", TraditionalForm]}, {2.5, 
+       FormBox["3", TraditionalForm]}, {3.5, 
+       FormBox["4", TraditionalForm]}, {4.5, 
+       FormBox["5", TraditionalForm]}, {5.5, 
+       FormBox["6", TraditionalForm]}}}},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  ImageSize->Small,
+  Method->{
+   "AxisPadding" -> Scaled[0.02], "DefaultBoundaryStyle" -> Automatic, 
+    "DefaultPlotStyle" -> Automatic, "DomainPadding" -> Scaled[0.02], 
+    "RangePadding" -> Scaled[0.05]}]], "Output",
+ CellChangeTimes->{{3.841130011793043*^9, 3.841130015738484*^9}, 
+   3.8411301710206933`*^9, 3.841131747508787*^9, {3.8411328808313236`*^9, 
+   3.8411328972941236`*^9}, 3.8411352472912383`*^9}]
+}, Open  ]],
+
+Cell["\<\
+Now we introduce the functional, Energy.\[LineSeparator]We first treat the \
+Ising Model (without magnetic field).\[LineSeparator]\[LineSeparator]Future \
+Plans: Ising Model, Bose-Hubbard Model, Fermi Hubbard Model with particle \
+hole symmetry.\[LineSeparator]Interaction Strength: J\[LineSeparator]\
+\[LineSeparator]At some point we will define a magnetic field as an array, we \
+reserve h for the same.
+
+
+\
+\>", "Text",
+ CellChangeTimes->{{3.8411301930901546`*^9, 3.841130369502281*^9}, {
+  3.8411304541864524`*^9, 3.841130463807932*^9}, {3.8411305262148943`*^9, 
+  3.8411305383911266`*^9}, {3.8411314901519003`*^9, 3.841131539950137*^9}, {
+  3.8411315797781353`*^9, 3.841131580094877*^9}, {3.841131844140271*^9, 
+  3.841131849475272*^9}, {3.8411330136662254`*^9, 3.8411330139508266`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"J", "=", "1"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"Energy", "=", "0"}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"For", "[", 
+   RowBox[{
+    RowBox[{"i", "=", "1"}], ",", 
+    RowBox[{"i", "<", 
+     RowBox[{"(", 
+      RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+    RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"Energy", "=", " ", 
+      RowBox[{"Energy", "-", 
+       RowBox[{"J", "*", 
+        RowBox[{"Sum", "[", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"A", "[", 
+            RowBox[{"[", 
+             RowBox[{"i", ",", "j"}], "]"}], "]"}], "*", 
+           RowBox[{"A", "[", 
+            RowBox[{"[", 
+             RowBox[{"i", ",", 
+              RowBox[{"j", "+", "1"}]}], "]"}], "]"}]}], ",", 
+          RowBox[{"{", 
+           RowBox[{"j", ",", "1", ",", 
+            RowBox[{"(", 
+             RowBox[{"m", "-", "1"}], ")"}]}], "}"}]}], "]"}]}]}]}], ";"}]}], 
+   "\[IndentingNewLine]", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"j", "=", "1"}], ",", 
+     RowBox[{"j", "<", 
+      RowBox[{"(", 
+       RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+     RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Energy", "=", 
+       RowBox[{"Energy", "-", 
+        RowBox[{"J", "*", 
+         RowBox[{"Sum", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"A", "[", 
+             RowBox[{"[", 
+              RowBox[{"i", ",", "j"}], "]"}], "]"}], "*", 
+            RowBox[{"A", "[", 
+             RowBox[{"[", 
+              RowBox[{
+               RowBox[{"i", "+", "1"}], ",", "j"}], "]"}], "]"}]}], ",", 
+           RowBox[{"{", 
+            RowBox[{"i", ",", "1", ",", 
+             RowBox[{"(", 
+              RowBox[{"m", "-", "1"}], ")"}]}], "}"}]}], "]"}]}]}]}], ";"}]}],
+     "\[IndentingNewLine]", "]"}], ";"}], 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"For", "[", 
+   RowBox[{
+    RowBox[{"i", "=", "1"}], ",", 
+    RowBox[{"i", "<", 
+     RowBox[{"(", 
+      RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+    RowBox[{"i", "++"}], ",", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"Energy", "=", " ", 
+      RowBox[{"Energy", "-", 
+       RowBox[{"J", "*", 
+        RowBox[{"A", "[", 
+         RowBox[{"[", 
+          RowBox[{"i", ",", "1"}], "]"}], "]"}], "*", 
+        RowBox[{"A", "[", 
+         RowBox[{"[", 
+          RowBox[{"i", ",", "m"}], "]"}], "]"}]}]}]}], ";"}]}], 
+   "\[IndentingNewLine]", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"For", "[", 
+    RowBox[{
+     RowBox[{"j", "=", "1"}], ",", 
+     RowBox[{"j", "<", 
+      RowBox[{"(", 
+       RowBox[{"m", "+", "1"}], ")"}]}], ",", 
+     RowBox[{"j", "++"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Energy", "=", 
+       RowBox[{"Energy", "-", 
+        RowBox[{"J", "*", 
+         RowBox[{"A", "[", 
+          RowBox[{"[", 
+           RowBox[{"1", ",", "j"}], "]"}], "]"}], "*", 
+         RowBox[{"A", "[", 
+          RowBox[{"[", 
+           RowBox[{"m", ",", "j"}], "]"}], "]"}]}]}]}], ";"}]}], 
+    "\[IndentingNewLine]", "]"}], ";"}], "\[IndentingNewLine]", 
+  "\[IndentingNewLine]"}], "\[IndentingNewLine]", "Energy", "\
+\[IndentingNewLine]"}], "Input",
+ CellChangeTimes->{{3.841131851328531*^9, 3.841131864201101*^9}, {
+  3.8411324447102146`*^9, 3.8411324508463492`*^9}, {3.841132822111025*^9, 
+  3.841132864316908*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", "4"}]], "Output",
+ CellChangeTimes->{{3.8411328742585225`*^9, 3.841132904221986*^9}, 
+   3.841135257303183*^9}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Appendices", "Section",
+ CellChangeTimes->{{3.841135105686181*^9, 3.8411351363172083`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Exporting Animations as gif", "Subsubsection",
+ CellChangeTimes->{{3.8411348742966394`*^9, 3.8411348960223656`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"https", ":"}], "//", 
+   RowBox[{
+    RowBox[{"www", ".", "youtube", ".", "com"}], "/", 
+    RowBox[{"watch", "?", "v"}]}]}], "=", "CMor1VtBZzA"}]], "Input",
+ CellChangeTimes->{{3.841134955062981*^9, 3.841134955071005*^9}}],
+
+Cell["\<\
+Break Manipulate into function, and manipulate, then import as a table.\
+\>", "Text",
+ CellChangeTimes->{{3.841134966276519*^9, 3.8411350238708715`*^9}}]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1366, 695},
+WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 90, 1, 70, "Section"],
+Cell[673, 25, 713, 11, 144, "Text"],
+Cell[CellGroupData[{
+Cell[1411, 40, 376, 9, 50, "Input"],
+Cell[1790, 51, 809, 22, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2636, 78, 557, 14, 50, "Input"],
+Cell[3196, 94, 837, 22, 128, "Output"],
+Cell[4036, 118, 2151, 48, 209, "Output"]
+}, Open  ]],
+Cell[6202, 169, 330, 8, 68, "Text"],
+Cell[CellGroupData[{
+Cell[6557, 181, 1766, 46, 164, "Input"],
+Cell[8326, 229, 1380, 45, 128, "Output"],
+Cell[9709, 276, 2278, 51, 209, "Output"]
+}, Open  ]],
+Cell[12002, 330, 354, 8, 87, "Text"],
+Cell[CellGroupData[{
+Cell[12381, 342, 1416, 39, 126, "Input"],
+Cell[13800, 383, 1451, 46, 128, "Output"],
+Cell[15254, 431, 2330, 51, 209, "Output"]
+}, Open  ]],
+Cell[17599, 485, 802, 15, 201, "Text"],
+Cell[CellGroupData[{
+Cell[18426, 504, 3562, 106, 411, "Input"],
+Cell[21991, 612, 139, 3, 30, "Output"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[22179, 621, 97, 1, 70, "Section"],
+Cell[CellGroupData[{
+Cell[22301, 626, 122, 1, 39, "Subsubsection"],
+Cell[22426, 629, 270, 7, 30, "Input"],
+Cell[22699, 638, 163, 3, 30, "Text"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
